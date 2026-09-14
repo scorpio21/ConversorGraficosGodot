@@ -1,0 +1,21 @@
+# Godot
+.godot/
+*.import
+*.ctex
+*.translation
+*.uid
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build
+*.exe
+*.app

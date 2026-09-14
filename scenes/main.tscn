@@ -1,0 +1,318 @@
+[gd_scene format=3 uid="uid://b4k3mxq1p7e8w"]
+
+[ext_resource type="Script" uid="uid://cuarvijqwygeq" path="res://scripts/main.gd" id="1_main"]
+
+[node name="Main" type="Control" unique_id=1877532361]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1840339617]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.071, 0.078, 0.118, 1)
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=385229843]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TitleBar" type="HBoxContainer" parent="VBox" unique_id=519253752]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LblTitle" type="Label" parent="VBox/TitleBar" unique_id=1449738769]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.902, 0.584, 0.251, 1)
+theme_override_font_sizes/font_size = 20
+text = "🖼  Conversor de Gráficos"
+
+[node name="LblSubtitle" type="Label" parent="VBox/TitleBar" unique_id=1853955370]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.45, 0.58, 1)
+theme_override_font_sizes/font_size = 11
+text = "Godot 4.7  ·  by Scorpio  ·  :)"
+vertical_alignment = 1
+
+[node name="PanelFolders" type="PanelContainer" parent="VBox" unique_id=111499246]
+layout_mode = 2
+
+[node name="VBoxFolders" type="VBoxContainer" parent="VBox/PanelFolders" unique_id=495646246]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LblFolderTitle" type="Label" parent="VBox/PanelFolders/VBoxFolders" unique_id=968274425]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.78, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "📁  Carpetas"
+
+[node name="GridFolders" type="GridContainer" parent="VBox/PanelFolders/VBoxFolders" unique_id=583887454]
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+columns = 3
+
+[node name="LblInputLabel" type="Label" parent="VBox/PanelFolders/VBoxFolders/GridFolders" unique_id=546103878]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+text = "Entrada:"
+
+[node name="LblInputPath" type="Label" parent="VBox/PanelFolders/VBoxFolders/GridFolders" unique_id=835100811]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+text = "(ninguna)"
+clip_text = true
+
+[node name="BtnInput" type="Button" parent="VBox/PanelFolders/VBoxFolders/GridFolders" unique_id=1980245724]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+text = "📂 Seleccionar..."
+
+[node name="LblOutputLabel" type="Label" parent="VBox/PanelFolders/VBoxFolders/GridFolders" unique_id=1212155751]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+text = "Salida:"
+
+[node name="LblOutputPath" type="Label" parent="VBox/PanelFolders/VBoxFolders/GridFolders" unique_id=1696250517]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+text = "(ninguna)"
+clip_text = true
+
+[node name="BtnOutput" type="Button" parent="VBox/PanelFolders/VBoxFolders/GridFolders" unique_id=1622032288]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+text = "📂 Seleccionar..."
+
+[node name="PanelOptions" type="PanelContainer" parent="VBox" unique_id=1071708411]
+layout_mode = 2
+
+[node name="VBoxOpts" type="VBoxContainer" parent="VBox/PanelOptions" unique_id=1316134845]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LblOptsTitle" type="Label" parent="VBox/PanelOptions/VBoxOpts" unique_id=1038350012]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.78, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "⚙  Opciones de conversión"
+
+[node name="HBoxOpts" type="HBoxContainer" parent="VBox/PanelOptions/VBoxOpts" unique_id=1688898954]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LblW" type="Label" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=1809162829]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+text = "Ancho:"
+vertical_alignment = 1
+
+[node name="SpinWidth" type="SpinBox" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=1433594824]
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+min_value = 1.0
+max_value = 4096.0
+value = 32.0
+
+[node name="LblH" type="Label" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=996350367]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+text = "Alto:"
+vertical_alignment = 1
+
+[node name="SpinHeight" type="SpinBox" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=520929066]
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+min_value = 1.0
+max_value = 4096.0
+value = 32.0
+
+[node name="ChkKeepAR" type="CheckBox" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=1330759256]
+layout_mode = 2
+text = "Mantener proporción"
+
+[node name="VSep1" type="VSeparator" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=2069818304]
+layout_mode = 2
+
+[node name="LblFmt" type="Label" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=625438633]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+text = "Formato:"
+vertical_alignment = 1
+
+[node name="OptFormat" type="OptionButton" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=348011934]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+
+[node name="VSep2" type="VSeparator" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=621901578]
+layout_mode = 2
+
+[node name="LblInterp" type="Label" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=1111974710]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.75, 0.85, 1)
+text = "Interpolación:"
+vertical_alignment = 1
+
+[node name="OptInterp" type="OptionButton" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=87772550]
+custom_minimum_size = Vector2(155, 0)
+layout_mode = 2
+
+[node name="HBoxPresets" type="HBoxContainer" parent="VBox/PanelOptions/VBoxOpts" unique_id=1678263464]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="LblPresets" type="Label" parent="VBox/PanelOptions/VBoxOpts/HBoxPresets" unique_id=776475056]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.65, 1)
+text = "Presets:"
+vertical_alignment = 1
+
+[node name="Btn16" type="Button" parent="VBox/PanelOptions/VBoxOpts/HBoxPresets" unique_id=184387037]
+layout_mode = 2
+text = "16×16"
+
+[node name="Btn32" type="Button" parent="VBox/PanelOptions/VBoxOpts/HBoxPresets" unique_id=1338941551]
+layout_mode = 2
+text = "32×32"
+
+[node name="Btn48" type="Button" parent="VBox/PanelOptions/VBoxOpts/HBoxPresets" unique_id=680466099]
+layout_mode = 2
+text = "48×48"
+
+[node name="Btn64" type="Button" parent="VBox/PanelOptions/VBoxOpts/HBoxPresets" unique_id=1359074758]
+layout_mode = 2
+text = "64×64"
+
+[node name="Btn128" type="Button" parent="VBox/PanelOptions/VBoxOpts/HBoxPresets" unique_id=1343314037]
+layout_mode = 2
+text = "128×128"
+
+[node name="Btn256" type="Button" parent="VBox/PanelOptions/VBoxOpts/HBoxPresets" unique_id=319783608]
+layout_mode = 2
+text = "256×256"
+
+[node name="Btn512" type="Button" parent="VBox/PanelOptions/VBoxOpts/HBoxPresets" unique_id=1372159207]
+layout_mode = 2
+text = "512×512"
+
+[node name="HBoxOpts2" type="HBoxContainer" parent="VBox/PanelOptions/VBoxOpts" unique_id=1406508107]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="ChkSubfolders" type="CheckBox" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts2" unique_id=784145069]
+layout_mode = 2
+button_pressed = true
+text = "Incluir subcarpetas"
+
+[node name="ChkOverwrite" type="CheckBox" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts2" unique_id=335283992]
+layout_mode = 2
+button_pressed = true
+text = "Sobreescribir existentes"
+
+[node name="PanelFiles" type="PanelContainer" parent="VBox" unique_id=330675105]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxFiles" type="VBoxContainer" parent="VBox/PanelFiles" unique_id=1660026032]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="HBoxFilesHeader" type="HBoxContainer" parent="VBox/PanelFiles/VBoxFiles" unique_id=1753393870]
+layout_mode = 2
+
+[node name="LblFilesTitle" type="Label" parent="VBox/PanelFiles/VBoxFiles/HBoxFilesHeader" unique_id=105696155]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.55, 0.78, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "📋  Archivos detectados"
+
+[node name="LblCount" type="Label" parent="VBox/PanelFiles/VBoxFiles/HBoxFilesHeader" unique_id=1057577818]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.65, 1)
+theme_override_font_sizes/font_size = 12
+text = "Archivos encontrados: 0"
+vertical_alignment = 1
+
+[node name="ItemList" type="ItemList" parent="VBox/PanelFiles/VBoxFiles" unique_id=1956222654]
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PanelProgress" type="PanelContainer" parent="VBox" unique_id=1667267009]
+layout_mode = 2
+
+[node name="VBoxProgress" type="VBoxContainer" parent="VBox/PanelProgress" unique_id=15746124]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="ProgressBar" type="ProgressBar" parent="VBox/PanelProgress/VBoxProgress" unique_id=1386068261]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+
+[node name="LblStatus" type="Label" parent="VBox/PanelProgress/VBoxProgress" unique_id=2103106947]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.72, 1)
+theme_override_font_sizes/font_size = 12
+text = "Listo."
+
+[node name="HBoxButtons" type="HBoxContainer" parent="VBox" unique_id=1803178142]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BtnScan" type="Button" parent="VBox/HBoxButtons" unique_id=196009544]
+custom_minimum_size = Vector2(150, 38)
+layout_mode = 2
+disabled = true
+text = "🔍  Escanear carpeta"
+
+[node name="BtnConvert" type="Button" parent="VBox/HBoxButtons" unique_id=196784882]
+custom_minimum_size = Vector2(180, 38)
+layout_mode = 2
+disabled = true
+text = "▶  Convertir todo"
+
+[node name="HSpacer" type="Control" parent="VBox/HBoxButtons" unique_id=1487001271]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnOpenOutput" type="Button" parent="VBox/HBoxButtons" unique_id=471599787]
+custom_minimum_size = Vector2(160, 38)
+layout_mode = 2
+text = "📁  Abrir carpeta salida"
+
+[node name="BtnClear" type="Button" parent="VBox/HBoxButtons" unique_id=1145182421]
+custom_minimum_size = Vector2(110, 38)
+layout_mode = 2
+text = "🗑  Limpiar"
+
+[node name="FileDialogIn" type="FileDialog" parent="." unique_id=2087043996]
+title = "Seleccionar carpeta de entrada"
+file_mode = 2
+access = 2
+
+[node name="FileDialogOut" type="FileDialog" parent="." unique_id=1501004169]
+title = "Seleccionar carpeta de salida"
+file_mode = 4
+access = 2

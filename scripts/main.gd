@@ -7,11 +7,13 @@ extends Control
 # ─────────────────────────────────────────────
 
 const SUPPORTED_EXTENSIONS := ["bmp", "png", "jpg", "jpeg", "tga", "webp"]
+const CONFIG_FILE := "user://conversor_config.cfg"
 
 var input_folder  : String = ""
 var output_folder : String = ""
 var file_list     : Array[String] = []
 var is_converting : bool = false
+var auto_mode     : bool = true   # Modo automático SIEMPRE activo (como VB6 original)
 
 # ── referencias UI ───────────────────────────
 @onready var lbl_input        : Label        = $VBox/PanelFolders/VBoxFolders/GridFolders/LblInputPath
@@ -36,23 +38,33 @@ var is_converting : bool = false
 func _ready() -> void:
 	_setup_options()
 	_connect_signals()
+	_load_config()  # Cargar configuración guardada
 	_set_status("Selecciona una carpeta de entrada para comenzar.", Color.GRAY)
 	progress_bar.value = 0
 	btn_convert.disabled = true
 	btn_scan.disabled = true
+	
+	# Modo automático siempre activo (como VB6 original)
+	auto_mode = true
+	# Deshabilitar controles manuales ya que siempre es automático
+	spin_width.editable = false
+	spin_height.editable = false
+	check_keep_ar.disabled = true
 
-	# Intentar detectar carpeta Graficos junto al ejecutable
-	var default_in := OS.get_executable_path().get_base_dir().path_join("Graficos")
-	if DirAccess.dir_exists_absolute(default_in):
-		_set_input_folder(default_in)
+	# Intentar detectar carpeta Graficos junto al ejecutable solo si no hay configuración guardada
+	if input_folder.is_empty():
+		var default_in := OS.get_executable_path().get_base_dir().path_join("Graficos")
+		if DirAccess.dir_exists_absolute(default_in):
+			_set_input_folder(default_in)
 
 
 func _setup_options() -> void:
 	opt_format.clear()
 	opt_format.add_item("PNG", 0)
-	opt_format.add_item("BMP", 1)
-	opt_format.add_item("JPG", 2)
-	opt_format.add_item("WebP", 3)
+	opt_format.add_item("JPG", 1)
+	opt_format.add_item("WebP", 2)
+	opt_format.add_item("EXR (HDR)", 3)
+	opt_format.add_item("DDS", 4)
 	opt_format.selected = 0
 
 	opt_interp.clear()
@@ -60,7 +72,7 @@ func _setup_options() -> void:
 	opt_interp.add_item("Bilineal", 1)
 	opt_interp.add_item("Cúbica", 2)
 	opt_interp.add_item("Lanczos", 3)
-	opt_interp.selected = 0
+	opt_interp.selected = 0  # Nearest por defecto para similaridad con VB6
 
 	spin_width.value  = 32.0
 	spin_height.value = 32.0
@@ -109,6 +121,7 @@ func _on_btn_output_pressed() -> void:
 
 func _on_file_dialog_in_dir_selected(dir: String) -> void:
 	_set_input_folder(dir)
+	_save_config()  # Guardar configuración al cambiar ruta
 
 
 func _on_file_dialog_out_dir_selected(dir: String) -> void:
@@ -116,6 +129,7 @@ func _on_file_dialog_out_dir_selected(dir: String) -> void:
 	lbl_output.text = dir
 	lbl_output.tooltip_text = dir
 	_check_ready()
+	_save_config()  # Guardar configuración al cambiar ruta
 
 
 func _set_input_folder(dir: String) -> void:
@@ -226,6 +240,9 @@ func _start_conversion() -> void:
 	var overwrite  := check_overwrite.button_pressed
 	var interp     := _get_interpolation(interp_idx)
 	var ext        := _get_extension(fmt_idx)
+	
+	# Modo automático siempre activo (como VB6 original)
+	auto_mode = true
 
 	progress_bar.max_value = float(file_list.size())
 	progress_bar.value = 0.0
@@ -250,17 +267,31 @@ func _start_conversion() -> void:
 			await get_tree().process_frame
 			continue
 
-		# Tamaño destino con proporción
+		# Tamaño destino
 		var dw := target_w
 		var dh := target_h
-		if keep_ar:
+		
+		if auto_mode:
+			# Lógica original del código VB6
+			var orig_w := img.get_width()
+			var orig_h := img.get_height()
+			var max_dim := maxi(orig_w, orig_h)
+			var auto_size := _obtener_dimension(max_dim)
+			print("DEBUG: Imagen original: ", orig_w, "x", orig_h, " | Max dim: ", max_dim, " | Auto size: ", auto_size)
+			dw = auto_size
+			dh = auto_size
+			print("DEBUG: Resize a: ", dw, "x", dh)
+		elif keep_ar:
+			# Preservar aspect ratio manual
 			var ratio := float(img.get_width()) / float(img.get_height())
 			if ratio >= 1.0:
 				dh = maxi(1, int(float(dw) / ratio))
 			else:
 				dw = maxi(1, int(float(dh) * ratio))
 
+		print("DEBUG: Antes de resize - Tamaño actual: ", img.get_width(), "x", img.get_height())
 		img.resize(dw, dh, interp)
+		print("DEBUG: Después de resize - Tamaño actual: ", img.get_width(), "x", img.get_height())
 
 		# Ruta de salida
 		var rel := file_list[i].trim_prefix(input_folder).trim_prefix("/").trim_prefix("\\")
@@ -325,18 +356,42 @@ func _get_interpolation(idx: int) -> Image.Interpolation:
 func _get_extension(fmt_idx: int) -> String:
 	match fmt_idx:
 		0: return "png"
-		1: return "bmp"
-		2: return "jpg"
-		3: return "webp"
+		1: return "jpg"
+		2: return "webp"
+		3: return "exr"
+		4: return "dds"
 	return "png"
+
+
+# Función original del código VB6 para determinar tamaño automáticamente
+func _obtener_dimension(dim: int) -> int:
+	if dim <= 32:
+		return 32
+	elif dim <= 64:
+		return 64
+	elif dim <= 128:
+		return 128
+	elif dim <= 256:
+		return 256
+	elif dim <= 512:
+		return 512
+	elif dim <= 1024:
+		return 1024
+	elif dim <= 2048:
+		return 2048
+	elif dim <= 4096:
+		return 4096
+	else:
+		return 4096
 
 
 func _save_image(img: Image, path: String, fmt_idx: int) -> Error:
 	match fmt_idx:
 		0: return img.save_png(path)
-		1: return img.save_bmp(path)
-		2: return img.save_jpg(path, 0.92)
-		3: return img.save_webp(path)
+		1: return img.save_jpg(path, 0.92)
+		2: return img.save_webp(path, false, 0.92)
+		3: return img.save_exr(path, false)
+		4: return img.save_dds(path)
 	return img.save_png(path)
 
 
@@ -344,6 +399,73 @@ func _set_status(msg: String, color: Color = Color.WHITE) -> void:
 	if is_instance_valid(lbl_status):
 		lbl_status.text = msg
 		lbl_status.modulate = color
+
+
+# ─────────────────────────────────────────────
+#  CONFIGURACIÓN
+# ─────────────────────────────────────────────
+
+func _save_config() -> void:
+	var config := ConfigFile.new()
+	config.set_value("paths", "input_folder", input_folder)
+	config.set_value("paths", "output_folder", output_folder)
+	config.set_value("settings", "keep_ar", check_keep_ar.button_pressed)
+	config.set_value("settings", "subfolders", check_subfolders.button_pressed)
+	config.set_value("settings", "overwrite", check_overwrite.button_pressed)
+	config.set_value("settings", "format", opt_format.selected)
+	config.set_value("settings", "interpolation", opt_interp.selected)
+	
+	var err := config.save(CONFIG_FILE)
+	if err != OK:
+		print("Error guardando configuración: ", err)
+
+
+func _load_config() -> void:
+	var config := ConfigFile.new()
+	var err := config.load(CONFIG_FILE)
+	
+	if err != OK:
+		print("No hay configuración guardada o error al cargar: ", err)
+		return
+	
+	# Cargar rutas
+	input_folder = config.get_value("paths", "input_folder", "")
+	output_folder = config.get_value("paths", "output_folder", "")
+	
+	# Aplicar rutas si existen
+	if not input_folder.is_empty() and DirAccess.dir_exists_absolute(input_folder):
+		lbl_input.text = input_folder
+		lbl_input.tooltip_text = input_folder
+		btn_scan.disabled = false
+	
+	if not output_folder.is_empty():
+		lbl_output.text = output_folder
+		lbl_output.tooltip_text = output_folder
+	
+	# Cargar configuraciones
+	var loaded_keep_ar := config.get_value("settings", "keep_ar", false) as bool
+	var loaded_subfolders := config.get_value("settings", "subfolders", true) as bool
+	var loaded_overwrite := config.get_value("settings", "overwrite", true) as bool
+	var loaded_format := config.get_value("settings", "format", 0) as int
+	var loaded_interp := config.get_value("settings", "interpolation", 0) as int  # Nearest por defecto
+	
+	# Aplicar configuraciones después de que la UI esté lista
+	call_deferred("_apply_loaded_config", loaded_keep_ar, loaded_subfolders, 
+				   loaded_overwrite, loaded_format, loaded_interp)
+
+
+func _apply_loaded_config(keep: bool, sub: bool, over: bool, fmt: int, inter: int) -> void:
+	check_keep_ar.button_pressed = keep
+	check_subfolders.button_pressed = sub
+	check_overwrite.button_pressed = over
+	opt_format.selected = fmt
+	opt_interp.selected = inter
+	
+	# Modo automático siempre activo
+	auto_mode = true
+	spin_width.editable = false
+	spin_height.editable = false
+	check_keep_ar.disabled = true
 
 
 # ══════════════════════════════════════════════
@@ -369,6 +491,7 @@ func _on_btn_clear_pressed() -> void:
 func _on_spin_width_value_changed(value: float) -> void:
 	if check_keep_ar.button_pressed:
 		spin_height.set_value_no_signal(value)
+	_save_config()  # Guardar configuración al cambiar tamaño
 
 
 func _on_spin_height_value_changed(value: float) -> void:

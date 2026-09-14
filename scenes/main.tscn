@@ -314,5 +314,5 @@ access = 2
 
 [node name="FileDialogOut" type="FileDialog" parent="." unique_id=1501004169]
 title = "Seleccionar carpeta de salida"
-file_mode = 4
+file_mode = 2
 access = 2

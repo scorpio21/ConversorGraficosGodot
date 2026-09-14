@@ -5,12 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-09-14
+
+### Added
+- Added EXR (HDR) format support for output
+- Added DDS format support for output
+- Updated format options to include EXR and DDS
+- Improved format documentation in README
+
+### Fixed
+- Fixed format output options to match Godot 4 capabilities
+- Removed incorrect BMP output format (not available in Godot 4)
+- Updated save_image function to use correct save methods
+
 ## [1.0.0] - 2026-09-14
 
 ### Added
 - Initial release of Conversor de Gráficos
 - Multiple input format support (BMP, PNG, JPG, JPEG, TGA, WebP)
-- Multiple output format support (PNG, BMP, JPG, WebP)
+- Multiple output format support (PNG, JPG, WebP)
 - Customizable resize dimensions (1-4096px)
 - Multiple interpolation methods (Nearest, Bilinear, Cubic, Lanczos)
 - Recursive folder scanning with subfolder option

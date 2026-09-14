@@ -8,7 +8,7 @@ Conversor de imágenes masivo desarrollado en Godot 4.7. Permite redimensionar y
 ## Características
 
 - 🎨 **Múltiples formatos de entrada**: BMP, PNG, JPG, JPEG, TGA, WebP
-- 📦 **Formatos de salida**: PNG, BMP, JPG, WebP
+- 📦 **Formatos de salida**: PNG, JPG, WebP, EXR (HDR), DDS
 - 📐 **Redimensionamiento personalizado**: Ancho y alto configurables (1-4096px)
 - 🔄 **Métodos de interpolación**: Nearest, Bilineal, Cúbica, Lanczos
 - 📁 **Escaneo recursivo**: Incluir subcarpetas automáticamente

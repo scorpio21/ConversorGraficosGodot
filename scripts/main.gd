@@ -13,6 +13,8 @@ extends Control
 
 const SUPPORTED_EXTENSIONS := ["bmp", "png", "jpg", "jpeg", "tga", "webp"]
 const CONFIG_FILE := "user://conversor_config.cfg"
+const VERSION_SETTING := "application/config/version"
+const DEFAULT_VERSION := "1.1"
 const BMP8_BPP := 8
 const BMP24_BPP := 24
 
@@ -42,27 +44,61 @@ var auto_mode: bool = true
 @onready var help_menu: MenuButton = $VBox/TitleBar/HelpMenu
 @onready var help_dialog: AcceptDialog = $HelpDialog
 @onready var help_text: RichTextLabel = $HelpDialog/HelpText
+@onready var lbl_clock: Label = $VBox/StatusBar/LblClock
+@onready var lbl_version: Label = $VBox/StatusBar/LblVersion
+@onready var status_timer: Timer = $StatusTimer
+
+var app_version: String = DEFAULT_VERSION
+var manual_aspect_ratio: float = 1.0
 
 
 func _ready() -> void:
 	_setup_options()
 	_connect_signals()
 	_setup_help_menu()
+	_setup_status_bar()
 	_load_config()
-	_set_status("Selecciona una carpeta de entrada para comenzar.", Color.GRAY)
 	progress_bar.value = 0
-	btn_convert.disabled = true
-	btn_scan.disabled = true
 
 	auto_mode = true
-	spin_width.editable = false
-	spin_height.editable = false
-	check_keep_ar.disabled = true
+	_update_option_availability()
 
+	# Si no hay una ruta guardada, intentamos localizar una carpeta
+	# Graficos junto al ejecutable. La inicialización real se hace
+	# diferida para que primero se haya aplicado la configuración guardada.
 	if input_folder.is_empty():
 		var default_in := OS.get_executable_path().get_base_dir().path_join("Graficos")
 		if DirAccess.dir_exists_absolute(default_in):
-			_set_input_folder(default_in)
+			input_folder = default_in
+
+	call_deferred("_initialize_startup")
+
+
+func _initialize_startup() -> void:
+	# Mostrar las rutas guardadas y, si la entrada sigue existiendo,
+	# escanearla automáticamente al arrancar.
+	if not input_folder.is_empty() and DirAccess.dir_exists_absolute(input_folder):
+		lbl_input.text = input_folder
+		lbl_input.tooltip_text = input_folder
+		btn_scan.disabled = false
+
+		if output_folder.is_empty():
+			output_folder = input_folder.get_base_dir().path_join(input_folder.get_file() + "_Output")
+			lbl_output.text = output_folder
+			lbl_output.tooltip_text = output_folder
+		elif not output_folder.is_empty():
+			lbl_output.text = output_folder
+			lbl_output.tooltip_text = output_folder
+
+		_scan_files()
+		return
+
+	btn_scan.disabled = true
+	btn_convert.disabled = true
+	if not input_folder.is_empty():
+		_set_status("⚠ La carpeta de entrada guardada ya no existe. Selecciona otra.", Color.ORANGE)
+	else:
+		_set_status("Selecciona una carpeta de entrada para comenzar.", Color.GRAY)
 
 
 func _setup_options() -> void:
@@ -91,6 +127,20 @@ func _setup_options() -> void:
 	spin_height.max_value = 4096.0
 
 
+func _setup_status_bar() -> void:
+	app_version = str(ProjectSettings.get_setting(VERSION_SETTING, DEFAULT_VERSION))
+	lbl_version.text = "Versión %s" % app_version
+	_update_clock()
+
+
+func _update_clock() -> void:
+	lbl_clock.text = "🕒  %s" % Time.get_time_string_from_system()
+
+
+func _on_status_timer_timeout() -> void:
+	_update_clock()
+
+
 func _connect_signals() -> void:
 	$VBox/PanelFolders/VBoxFolders/GridFolders/BtnInput.pressed.connect(_on_btn_input_pressed)
 	$VBox/PanelFolders/VBoxFolders/GridFolders/BtnOutput.pressed.connect(_on_btn_output_pressed)
@@ -100,8 +150,12 @@ func _connect_signals() -> void:
 	btn_convert.pressed.connect(_on_btn_convert_pressed)
 	$VBox/HBoxButtons/BtnOpenOutput.pressed.connect(_on_btn_open_output_pressed)
 	$VBox/HBoxButtons/BtnClear.pressed.connect(_on_btn_clear_pressed)
+	status_timer.timeout.connect(_on_status_timer_timeout)
 	spin_width.value_changed.connect(_on_spin_width_value_changed)
 	spin_height.value_changed.connect(_on_spin_height_value_changed)
+	check_keep_ar.toggled.connect(_on_keep_ar_toggled)
+	opt_format.item_selected.connect(_on_format_selected)
+	opt_interp.item_selected.connect(_on_interpolation_selected)
 
 	$VBox/PanelOptions/VBoxOpts/HBoxPresets/Btn16.pressed.connect(func(): _on_btn_preset_pressed(16, 16))
 	$VBox/PanelOptions/VBoxOpts/HBoxPresets/Btn32.pressed.connect(func(): _on_btn_preset_pressed(32, 32))
@@ -160,11 +214,13 @@ Si está activada la opción [b]Incluir subcarpetas[/b], también se procesan lo
 			title = "Tamaño y presets"
 			text = """[font_size=18][b]Tamaño[/b][/font_size]
 
-Los campos [b]Ancho[/b] y [b]Alto[/b] indican el tamaño manual cuando se utiliza un modo que lo necesita.
+Los campos [b]Ancho[/b] y [b]Alto[/b] permiten definir el tamaño de salida en los formatos normales.
 
 Los botones [b]16×16, 32×32, 48×48, 64×64, 128×128, 256×256 y 512×512[/b] son accesos rápidos para elegir un tamaño.
 
-En [b]BMP 8-bit (AO)[/b] el tamaño final se calcula automáticamente a partir de la mayor dimensión del BMP: 32, 64, 128, 256, 512, 1024, 2048 o 4096 píxeles. La imagen original se copia sin escalar."""
+[b]Mantener proporción[/b] conserva la relación de aspecto original al calcular el nuevo tamaño.
+
+En [b]BMP 8-bit (AO)[/b] el tamaño final se calcula automáticamente a partir de la mayor dimensión del BMP: 32, 64, 128, 256, 512, 1024, 2048 o 4096 píxeles. La imagen original se copia sin escalar y los controles manuales quedan desactivados."""
 
 		4:
 			title = "Formato BMP 8-bit (AO)"
@@ -186,16 +242,15 @@ Si el archivo de entrada es un BMP de 8 bits, el resultado también se escribe c
 			title = "Interpolación"
 			text = """[font_size=18][b]Interpolación[/b][/font_size]
 
-La interpolación solo tiene sentido cuando se cambia el tamaño de una imagen.
+La interpolación se aplica realmente al redimensionar los formatos normales.
 
-[b]Sin escalado (VB6/AO):[/b] no modifica el tamaño del gráfico; lo copia en (0,0). Es la opción recomendada para Argentum Online.
-
+[b]Sin escalado (VB6/AO):[/b] conserva las dimensiones originales.
 [b]Nearest:[/b] conserva bordes duros y es adecuada para pixel-art.
 [b]Bilineal:[/b] suaviza la imagen.
 [b]Cúbica:[/b] realiza una interpolación más suave.
 [b]Lanczos:[/b] está pensada para redimensionados de alta calidad.
 
-En [b]BMP 8-bit (AO)[/b] no se utiliza interpolación para la copia del gráfico original."""
+En [b]BMP 8-bit (AO)[/b] la interpolación queda desactivada porque el gráfico original se copia sin resize."""
 
 		6:
 			title = "Subcarpetas y sobrescritura"
@@ -212,7 +267,7 @@ Estas opciones permiten procesar grandes carpetas sin tener que reorganizar los 
 			text = """[font_size=18][b]Configuración recomendada para AO[/b][/font_size]
 
 1. [b]Formato:[/b] BMP 8-bit (AO).
-2. [b]Interpolación:[/b] Sin escalado (VB6/AO).
+2. [b]Interpolación:[/b] Sin escalado (VB6/AO). Esta opción es propia del flujo AO y queda desactivada automáticamente al seleccionar otros formatos.
 3. [b]Incluir subcarpetas:[/b] actívalo si tus gráficos están organizados por carpetas.
 4. [b]Sobreescribir existentes:[/b] actívalo si quieres regenerar la salida.
 5. Selecciona Entrada y Salida.
@@ -310,8 +365,47 @@ func _scan_dir(path: String, recursive: bool) -> void:
 
 
 func _on_btn_preset_pressed(w: int, h: int) -> void:
+	if opt_format.selected == 0:
+		return
 	spin_width.set_value_no_signal(float(w))
 	spin_height.set_value_no_signal(float(h))
+	manual_aspect_ratio = float(w) / float(h)
+	_save_config()
+
+
+func _on_format_selected(index: int) -> void:
+	if index == 0:
+		# BMP 8-bit (AO): comportamiento automático compatible con VB6.
+		opt_interp.select(0)
+	else:
+		# Para los formatos normales, la interpolación sí participa en el resize.
+		if opt_interp.selected == 0:
+			opt_interp.select(1)
+	_update_option_availability()
+	_save_config()
+
+
+func _on_interpolation_selected(_index: int) -> void:
+	_update_option_availability()
+	_save_config()
+
+
+func _update_option_availability() -> void:
+	var is_ao := opt_format.selected == 0
+	spin_width.editable = not is_ao
+	spin_height.editable = not is_ao
+	check_keep_ar.disabled = is_ao
+	opt_interp.disabled = is_ao
+
+	var presets := $VBox/PanelOptions/VBoxOpts/HBoxPresets
+	for child in presets.get_children():
+		if child is Button:
+			child.disabled = is_ao
+
+	if is_ao:
+		_set_status("Modo AO: tamaño automático, sin escalado ni interpolación.", Color.CYAN)
+	else:
+		_set_status("Modo manual: ancho, alto, proporción e interpolación activados.", Color.CYAN)
 
 
 func _check_ready() -> void:
@@ -418,14 +512,27 @@ func _convert_file(src_path: String, out_path: String, fmt_idx: int) -> Error:
 
 	var orig_w := img.get_width()
 	var orig_h := img.get_height()
-	var size := _obtener_dimension(maxi(orig_w, orig_h))
 
-	# Igual que VB6: lienzo negro y copia de la imagen en 0,0.
-	var canvas := Image.create(size, size, false, Image.FORMAT_RGBA8)
-	canvas.fill(Color.BLACK)
-	canvas.blit_rect(img, Rect2i(0, 0, orig_w, orig_h), Vector2i(0, 0))
+	# Los formatos normales usan el tamaño manual.
+	# "Sin escalado" conserva las dimensiones originales.
+	var dest_w := orig_w
+	var dest_h := orig_h
+	if opt_interp.selected != 0:
+		dest_w = maxi(1, int(spin_width.value))
+		dest_h = maxi(1, int(spin_height.value))
 
-	return _save_image(canvas, out_path, fmt_idx)
+		if check_keep_ar.button_pressed:
+			var ratio := float(orig_w) / float(orig_h)
+			var target_ratio := float(dest_w) / float(dest_h)
+			if target_ratio > ratio:
+				dest_w = maxi(1, int(round(float(dest_h) * ratio)))
+			else:
+				dest_h = maxi(1, int(round(float(dest_w) / ratio)))
+
+		var interpolation := _get_interpolation(opt_interp.selected)
+		img.resize(dest_w, dest_h, interpolation)
+
+	return _save_image(img, out_path, fmt_idx)
 
 
 # ══════════════════════════════════════════════
@@ -784,7 +891,6 @@ func _load_config() -> void:
 	if not input_folder.is_empty() and DirAccess.dir_exists_absolute(input_folder):
 		lbl_input.text = input_folder
 		lbl_input.tooltip_text = input_folder
-		btn_scan.disabled = false
 
 	if not output_folder.is_empty():
 		lbl_output.text = output_folder
@@ -804,10 +910,10 @@ func _apply_loaded_config(keep: bool, sub: bool, over: bool, fmt: int, inter: in
 	check_overwrite.button_pressed = over
 	opt_format.selected = clampi(fmt, 0, opt_format.item_count - 1)
 	opt_interp.selected = clampi(inter, 0, opt_interp.item_count - 1)
-	auto_mode = true
-	spin_width.editable = false
-	spin_height.editable = false
-	check_keep_ar.disabled = true
+	auto_mode = opt_format.selected == 0
+	if opt_format.selected != 0 and opt_interp.selected == 0:
+		opt_interp.select(1)
+	_update_option_availability()
 
 
 func _on_btn_open_output_pressed() -> void:
@@ -827,13 +933,24 @@ func _on_btn_clear_pressed() -> void:
 	_check_ready()
 
 
+func _on_keep_ar_toggled(enabled: bool) -> void:
+	if enabled:
+		if spin_height.value > 0.0:
+			manual_aspect_ratio = spin_width.value / spin_height.value
+	else:
+		manual_aspect_ratio = 1.0
+	_save_config()
+
+
 func _on_spin_width_value_changed(value: float) -> void:
-	if check_keep_ar.button_pressed:
-		spin_height.set_value_no_signal(value)
+	if check_keep_ar.button_pressed and manual_aspect_ratio > 0.0:
+		var new_height := maxi(1, int(round(value / manual_aspect_ratio)))
+		spin_height.set_value_no_signal(float(new_height))
 	_save_config()
 
 
 func _on_spin_height_value_changed(value: float) -> void:
-	if check_keep_ar.button_pressed:
-		spin_width.set_value_no_signal(value)
+	if check_keep_ar.button_pressed and manual_aspect_ratio > 0.0:
+		var new_width := maxi(1, int(round(value * manual_aspect_ratio)))
+		spin_width.set_value_no_signal(float(new_width))
 	_save_config()

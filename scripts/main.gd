@@ -39,11 +39,15 @@ var auto_mode: bool = true
 @onready var lbl_count: Label = $VBox/PanelFiles/VBoxFiles/HBoxFilesHeader/LblCount
 @onready var file_dialog_in: FileDialog = $FileDialogIn
 @onready var file_dialog_out: FileDialog = $FileDialogOut
+@onready var help_menu: MenuButton = $VBox/TitleBar/HelpMenu
+@onready var help_dialog: AcceptDialog = $HelpDialog
+@onready var help_text: RichTextLabel = $HelpDialog/HelpText
 
 
 func _ready() -> void:
 	_setup_options()
 	_connect_signals()
+	_setup_help_menu()
 	_load_config()
 	_set_status("Selecciona una carpeta de entrada para comenzar.", Color.GRAY)
 	progress_bar.value = 0
@@ -106,6 +110,123 @@ func _connect_signals() -> void:
 	$VBox/PanelOptions/VBoxOpts/HBoxPresets/Btn128.pressed.connect(func(): _on_btn_preset_pressed(128, 128))
 	$VBox/PanelOptions/VBoxOpts/HBoxPresets/Btn256.pressed.connect(func(): _on_btn_preset_pressed(256, 256))
 	$VBox/PanelOptions/VBoxOpts/HBoxPresets/Btn512.pressed.connect(func(): _on_btn_preset_pressed(512, 512))
+
+
+
+
+func _setup_help_menu() -> void:
+	var popup := help_menu.get_popup()
+	popup.clear()
+	popup.add_item("Cómo funciona", 1)
+	popup.add_item("Carpetas de entrada y salida", 2)
+	popup.add_item("Tamaño y presets", 3)
+	popup.add_item("Formato BMP 8-bit (AO)", 4)
+	popup.add_item("Interpolación", 5)
+	popup.add_item("Subcarpetas y sobrescritura", 6)
+	popup.add_separator()
+	popup.add_item("Flujo recomendado para Argentum Online", 7)
+	popup.id_pressed.connect(_on_help_menu_id_pressed)
+
+
+func _on_help_menu_id_pressed(id: int) -> void:
+	var title := "Ayuda - Conversor de Gráficos"
+	var text := ""
+
+	match id:
+		1:
+			title = "Cómo funciona"
+			text = """[font_size=18][b]Cómo funciona el conversor[/b][/font_size]
+
+1. Selecciona la carpeta [b]Entrada[/b], donde están tus gráficos.
+2. Selecciona la carpeta [b]Salida[/b], donde se guardarán los resultados.
+3. Pulsa [b]Escanear carpeta[/b] para detectar los archivos.
+4. Revisa el número de archivos encontrados.
+5. Pulsa [b]Convertir todo[/b].
+
+En el modo [b]BMP 8-bit (AO)[/b], la imagen original no se estira ni se interpola: se coloca desde la posición (0,0) sobre un lienzo cuadrado negro, siguiendo el comportamiento del conversor VB6 original."""
+
+		2:
+			title = "Carpetas de entrada y salida"
+			text = """[font_size=18][b]Carpetas[/b][/font_size]
+
+[b]Entrada:[/b] carpeta que contiene los gráficos que quieres procesar.
+[b]Salida:[/b] carpeta donde se crean los archivos convertidos.
+
+Puedes cambiar ambas carpetas con [b]Seleccionar...[/b]. La aplicación recuerda las rutas utilizadas.
+
+Si está activada la opción [b]Incluir subcarpetas[/b], también se procesan los gráficos que estén dentro de carpetas inferiores y se mantiene su estructura en la salida."""
+
+		3:
+			title = "Tamaño y presets"
+			text = """[font_size=18][b]Tamaño[/b][/font_size]
+
+Los campos [b]Ancho[/b] y [b]Alto[/b] indican el tamaño manual cuando se utiliza un modo que lo necesita.
+
+Los botones [b]16×16, 32×32, 48×48, 64×64, 128×128, 256×256 y 512×512[/b] son accesos rápidos para elegir un tamaño.
+
+En [b]BMP 8-bit (AO)[/b] el tamaño final se calcula automáticamente a partir de la mayor dimensión del BMP: 32, 64, 128, 256, 512, 1024, 2048 o 4096 píxeles. La imagen original se copia sin escalar."""
+
+		4:
+			title = "Formato BMP 8-bit (AO)"
+			text = """[font_size=18][b]BMP 8-bit (AO)[/b][/font_size]
+
+Este modo está pensado especialmente para los gráficos de [b]Argentum Online[/b].
+
+• Lee directamente BMP de 8 bits.
+• Conserva la paleta de hasta 256 colores.
+• Conserva los índices de píxel.
+• Respeta el padding de las filas BMP.
+• Admite BMP almacenados de abajo hacia arriba y de arriba hacia abajo.
+• Crea el cuadrado final con fondo negro.
+• No aplica resize ni interpolación al gráfico original.
+
+Si el archivo de entrada es un BMP de 8 bits, el resultado también se escribe como BMP de 8 bits con una paleta de 256 entradas."""
+
+		5:
+			title = "Interpolación"
+			text = """[font_size=18][b]Interpolación[/b][/font_size]
+
+La interpolación solo tiene sentido cuando se cambia el tamaño de una imagen.
+
+[b]Sin escalado (VB6/AO):[/b] no modifica el tamaño del gráfico; lo copia en (0,0). Es la opción recomendada para Argentum Online.
+
+[b]Nearest:[/b] conserva bordes duros y es adecuada para pixel-art.
+[b]Bilineal:[/b] suaviza la imagen.
+[b]Cúbica:[/b] realiza una interpolación más suave.
+[b]Lanczos:[/b] está pensada para redimensionados de alta calidad.
+
+En [b]BMP 8-bit (AO)[/b] no se utiliza interpolación para la copia del gráfico original."""
+
+		6:
+			title = "Subcarpetas y sobrescritura"
+			text = """[font_size=18][b]Opciones adicionales[/b][/font_size]
+
+[b]Incluir subcarpetas:[/b] busca BMP y otros formatos compatibles dentro de las carpetas inferiores y conserva su estructura relativa en la salida.
+
+[b]Sobreescribir existentes:[/b] si está activada, un archivo de salida existente se reemplaza. Si está desactivada, el archivo se omite y aparece como omitido en el resultado.
+
+Estas opciones permiten procesar grandes carpetas sin tener que reorganizar los gráficos manualmente."""
+
+		7:
+			title = "Flujo recomendado para Argentum Online"
+			text = """[font_size=18][b]Configuración recomendada para AO[/b][/font_size]
+
+1. [b]Formato:[/b] BMP 8-bit (AO).
+2. [b]Interpolación:[/b] Sin escalado (VB6/AO).
+3. [b]Incluir subcarpetas:[/b] actívalo si tus gráficos están organizados por carpetas.
+4. [b]Sobreescribir existentes:[/b] actívalo si quieres regenerar la salida.
+5. Selecciona Entrada y Salida.
+6. Escanea y comprueba los archivos detectados.
+7. Convierte.
+
+El objetivo de este modo es mantener el comportamiento del conversor VB6 utilizado con los gráficos de Argentum Online: [b]BMP 8-bit, paleta conservada, fondo negro y gráfico original sin escalar en (0,0).[/b]"""
+
+		_:
+			return
+
+	help_dialog.title = title
+	help_text.text = text
+	help_dialog.popup_centered(Vector2i(760, 520))
 
 
 func _on_btn_input_pressed() -> void:

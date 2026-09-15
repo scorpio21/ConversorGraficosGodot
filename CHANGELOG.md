@@ -20,6 +20,11 @@
 - El formato **BMP 8-bit (AO)** desactiva Ancho, Alto, Mantener proporción, Interpolación y presets porque esas opciones no corresponden al flujo automático AO.
 - Los formatos normales generan ahora exactamente las dimensiones configuradas, salvo cuando se usa **Sin escalado** o cuando **Mantener proporción** ajusta una de ellas para conservar la relación de aspecto.
 
+### Credits
+- Añadida la sección **Acerca de...** en el menú Ayuda con el creador **Scorpio** y el enlace al repositorio.
+- Se documenta que el proyecto está basado en el conversor original de Shackox (Visual Basic 6.0).
+- Agradecimiento explícito: **Gracias Blizzard por liberar el código Visual Basic 6.0.**
+
 Todos los cambios importantes de este proyecto se documentan en este archivo.
 
 El proyecto utiliza [Semantic Versioning](https://semver.org/spec/v2.0.0.html).

@@ -179,6 +179,8 @@ func _setup_help_menu() -> void:
 	popup.add_item("Subcarpetas y sobrescritura", 6)
 	popup.add_separator()
 	popup.add_item("Flujo recomendado para Argentum Online", 7)
+	popup.add_separator()
+	popup.add_item("Acerca de...", 8)
 	popup.id_pressed.connect(_on_help_menu_id_pressed)
 
 
@@ -275,6 +277,23 @@ Estas opciones permiten procesar grandes carpetas sin tener que reorganizar los 
 7. Convierte.
 
 El objetivo de este modo es mantener el comportamiento del conversor VB6 utilizado con los gráficos de Argentum Online: [b]BMP 8-bit, paleta conservada, fondo negro y gráfico original sin escalar en (0,0).[/b]"""
+
+		8:
+			title = "Acerca de..."
+			text = """[font_size=22][b]Conversor de Gráficos[/b][/font_size]
+
+[b]Versión 1.1[/b]
+
+[b]Creador:[/b] Scorpio
+
+[b]Repositorio:[/b]
+https://github.com/scorpio21/ConversorGraficosGodot
+
+Basado en el conversor de gráficos original de Shackox (Visual Basic 6.0).
+
+[b]Gracias Blizzard por liberar el código Visual Basic 6.0.[/b] ❤️
+
+Desarrollado con Godot 4.7."""
 
 		_:
 			return

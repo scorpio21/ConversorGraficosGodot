@@ -21,7 +21,7 @@ Conversor de gráficos desarrollado en **Godot 4.7**, basado en el conversor de 
 - 📊 **Progreso en tiempo real**: barra de progreso, contador y estado del archivo actual.
 - 💾 **Persistencia de configuración**: recuerda carpetas y opciones utilizadas.
 - 🚀 **Escaneo automático al iniciar**: si la carpeta guardada sigue existiendo, se escanea automáticamente.
-- ❓ **Menú Ayuda**: explica de forma clara las funciones de cada opción.
+- ❓ **Menú Ayuda**: explica de forma clara las funciones de cada opción e incluye **Acerca de...** con créditos y repositorio.
 - 🕒 **Barra de estado**: muestra la hora actual a la izquierda y la versión a la derecha.
 - 🌙 **Interfaz moderna**: tema oscuro adaptado a Godot 4.7.
 
@@ -151,9 +151,10 @@ ConversorGraficosGodot/
 
 ## Créditos
 
-- **Desarrollado por:** Scorpio
-- **Basado en:** Conversor de gráficos BMP original de Shackox (VB6)
-- **Agradecimientos:** Gracias a Blizzard por liberar el código original.
+- **Creador:** Scorpio
+- **Repositorio:** https://github.com/scorpio21/ConversorGraficosGodot
+- **Basado en:** Conversor de gráficos original de Shackox (Visual Basic 6.0).
+- **Agradecimiento:** **Gracias Blizzard por liberar el código Visual Basic 6.0.**
 
 ## Licencia
 

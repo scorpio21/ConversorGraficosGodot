@@ -25,5 +25,5 @@ ThemeManager="*res://autoload/theme_manager.gd"
 
 window/size/viewport_width=1000
 window/size/viewport_height=680
-window/size/min_width=850
+window/size/min_width=760
 window/size/min_height=540

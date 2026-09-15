@@ -117,9 +117,10 @@ theme_override_colors/font_color = Color(0.55, 0.78, 1, 1)
 theme_override_font_sizes/font_size = 12
 text = "⚙  Opciones de conversión"
 
-[node name="HBoxOpts" type="HBoxContainer" parent="VBox/PanelOptions/VBoxOpts" unique_id=1688898954]
+[node name="HBoxOpts" type="HFlowContainer" parent="VBox/PanelOptions/VBoxOpts" unique_id=1688898954]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 6
 
 [node name="LblW" type="Label" parent="VBox/PanelOptions/VBoxOpts/HBoxOpts" unique_id=1809162829]
 layout_mode = 2
@@ -177,9 +178,10 @@ vertical_alignment = 1
 custom_minimum_size = Vector2(155, 0)
 layout_mode = 2
 
-[node name="HBoxPresets" type="HBoxContainer" parent="VBox/PanelOptions/VBoxOpts" unique_id=1678263464]
+[node name="HBoxPresets" type="HFlowContainer" parent="VBox/PanelOptions/VBoxOpts" unique_id=1678263464]
 layout_mode = 2
-theme_override_constants/separation = 5
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
 
 [node name="LblPresets" type="Label" parent="VBox/PanelOptions/VBoxOpts/HBoxPresets" unique_id=776475056]
 layout_mode = 2
